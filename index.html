@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Nafas — Moderatsiya</title>
+<style>
+:root {
+  --paper: #FBFAF8; --card: #FFFFFF; --ink: #121212; --ink-2: #3A3936; --muted: #8C8B88;
+  --line: rgba(18,18,18,.08); --line-2: rgba(18,18,18,.14);
+  --accent: #B3262D; --accent-wash: #FCEBE8;
+  --severe: #8E1B21; --severe-wash: #F7E1E2;
+  --warn: #9A6400; --warn-wash: #FBF1DB;
+  --calm: #2F6B52; --calm-wash: #E3F1EA;
+  --bubble: #E9E9EB;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0F0E0E; --card: #191818; --ink: #F4F2F0; --ink-2: #D2CFCB; --muted: #8E8B87;
+    --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+    --accent: #E0555A; --accent-wash: #3A1F21; --severe: #F08A8E; --severe-wash: #3B1A1C;
+    --warn: #E6B45C; --warn-wash: #33290F; --calm: #7CC4A2; --calm-wash: #15291F; --bubble: #262629;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--paper); color: var(--ink); font: 15px/1.5 -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+kbd { font: 600 11px/1 ui-monospace, "SF Mono", monospace; padding: 3px 5px; border-radius: 5px; border: 1px solid var(--line-2); color: var(--muted); }
+
+/* sign-in */
+.gate { min-height: 100%; display: grid; place-items: center; padding: 24px; }
+.gate form { width: min(380px, 100%); }
+.gate h1 { font-size: 28px; letter-spacing: -.02em; margin: 18px 0 6px; }
+.gate p { color: var(--muted); margin: 0 0 22px; }
+.gate input { width: 100%; height: 46px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card); color: var(--ink); padding: 0 14px; font: inherit; }
+.gate .err { color: var(--accent); font-size: 13px; min-height: 20px; margin-top: 8px; }
+.primary { height: 44px; padding: 0 18px; border-radius: 22px; border: 0; background: var(--accent); color: #fff; font-weight: 600; }
+.mark { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; letter-spacing: -.01em; }
+.mark svg { width: 30px; height: 20px; }
+
+/* shell */
+.app { display: grid; grid-template-columns: 232px 1fr; height: 100%; }
+.rail { border-right: 1px solid var(--line); padding: 22px 14px; display: flex; flex-direction: column; gap: 22px; }
+.rail nav { display: flex; flex-direction: column; gap: 2px; }
+.rail nav button { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 38px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; text-align: left; color: var(--ink-2); }
+.rail nav button[aria-current="true"] { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--line); }
+.count { min-width: 22px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; display: inline-grid; place-items: center; }
+.count.quiet { background: transparent; color: var(--muted); font-weight: 500; }
+.pulse { margin-top: auto; display: grid; gap: 10px; padding: 0 12px; }
+.pulse div { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; }
+.pulse b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.signout { border: 0; background: none; color: var(--muted); font-size: 13px; text-align: left; padding: 0 12px; }
+
+.view { min-width: 0; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+.view header { padding: 22px 28px 14px; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+.view h2 { margin: 0; font-size: 24px; letter-spacing: -.02em; }
+.hint { color: var(--muted); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* inbox */
+.inbox { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, 380px) 1fr; border-top: 1px solid var(--line); }
+.cases { overflow: auto; border-right: 1px solid var(--line); }
+.case { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 14px 20px 14px 24px; position: relative; }
+.case[aria-selected="true"] { background: var(--card); }
+.case[aria-selected="true"]::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--accent); }
+.case .meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 12.5px; }
+.case .who { font-weight: 600; margin: 3px 0 2px; }
+.case .excerpt { color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-wash); color: var(--accent); }
+.chip.severe { background: var(--severe-wash); color: var(--severe); }
+.chip.warn { background: var(--warn-wash); color: var(--warn); }
+.chip.calm { background: var(--calm-wash); color: var(--calm); }
+.chip.plain { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-2); }
+
+.detail { overflow: auto; display: flex; flex-direction: column; }
+.detail .inner { padding: 26px 32px; max-width: 720px; width: 100%; flex: 1; }
+.detail .kicker { color: var(--muted); font-size: 13px; }
+.detail h3 { font-size: 20px; letter-spacing: -.01em; margin: 6px 0 4px; }
+.quote { margin: 18px 0 0; padding: 18px 20px; background: var(--card); border-radius: 16px; box-shadow: 0 0 0 1px var(--line); font-size: 16.5px; line-height: 1.6; white-space: pre-wrap; }
+.quote strong { display: block; margin-bottom: 6px; }
+.thread { margin-top: 18px; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.bubble { max-width: 78%; background: var(--bubble); padding: 8px 13px; border-radius: 18px; font-size: 15.5px; }
+.bubble time { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+.person { display: flex; align-items: center; gap: 10px; margin-top: 16px; color: var(--ink-2); font-size: 14px; }
+.strikes { display: inline-flex; gap: 3px; }
+.strikes i { width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
+.strikes i.on { background: var(--accent); }
+
+.verdict { position: sticky; bottom: 0; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(12px); padding: 14px 32px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn { height: 40px; padding: 0 14px; border-radius: 20px; border: 1px solid var(--line-2); background: var(--card); display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.btn:hover { border-color: var(--ink-2); }
+.btn.danger { background: var(--accent); border-color: transparent; color: #fff; }
+.btn.danger kbd { color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.35); }
+.btn:disabled { opacity: .5; cursor: default; }
+select.btn { appearance: none; padding-right: 14px; }
+.spacer { flex: 1; }
+
+.empty { display: grid; place-items: center; text-align: center; color: var(--muted); padding: 60px 24px; height: 100%; }
+.empty b { display: block; color: var(--ink); font-size: 17px; margin-bottom: 4px; }
+
+/* tables */
+.table { flex: 1; overflow: auto; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 110px 130px 1fr 190px 150px; gap: 16px; align-items: center; padding: 13px 28px; border-bottom: 1px solid var(--line); }
+.row.head { position: sticky; top: 0; background: var(--paper); color: var(--muted); font-size: 12.5px; padding-top: 10px; padding-bottom: 10px; z-index: 1; }
+.row .ex { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row time { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.row.r3 { grid-template-columns: 1fr 120px 200px 220px; }
+.link { border: 0; background: none; color: var(--accent); font-weight: 600; padding: 0; }
+
+/* groups */
+.groups { flex: 1; overflow: auto; border-top: 1px solid var(--line); }
+.group { display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding: 18px 28px; border-bottom: 1px solid var(--line); align-items: start; }
+.group .name { font-weight: 600; }
+.group .sub { color: var(--muted); font-size: 13px; }
+.mods { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.mod { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 6px 0 12px; border-radius: 16px; background: var(--card); box-shadow: 0 0 0 1px var(--line); }
+.mod button { border: 0; background: none; color: var(--muted); width: 22px; height: 22px; border-radius: 11px; }
+.mod button:hover { background: var(--accent-wash); color: var(--accent); }
+.adder { position: relative; }
+.adder input { height: 32px; width: 200px; border-radius: 16px; border: 1px dashed var(--line-2); background: transparent; color: var(--ink); padding: 0 12px; font: inherit; font-size: 14px; }
+.adder ul { position: absolute; top: 36px; left: 0; z-index: 5; list-style: none; margin: 0; padding: 6px; min-width: 220px; background: var(--card); border-radius: 12px; box-shadow: 0 0 0 1px var(--line), 0 12px 30px rgba(0,0,0,.12); }
+.adder li button { width: 100%; text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; }
+.adder li button:hover { background: var(--paper); }
+.warn-line { color: var(--warn); font-size: 13px; }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--ink); color: var(--paper); padding: 10px 16px; border-radius: 12px; font-weight: 500; transition: .25s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%); }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .rail { border-right: 0; border-bottom: 1px solid var(--line); padding: 14px 16px; gap: 12px; }
+  .rail nav { flex-direction: row; overflow-x: auto; }
+  .rail nav button { flex: none; }
+  .pulse, .signout { display: none; }
+  .inbox { grid-template-columns: 1fr; }
+  .cases { max-height: 42vh; border-right: 0; border-bottom: 1px solid var(--line); }
+  .detail .inner, .verdict { padding-left: 16px; padding-right: 16px; }
+  .view header { padding: 16px; }
+  .row, .row.r3 { grid-template-columns: 1fr; gap: 4px; padding: 12px 16px; }
+  .row.head { display: none; }
+  .group { grid-template-columns: 1fr; padding: 16px; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const API = "https://fczlnqxlsyltybjnovbf.supabase.co/functions/v1/admin";
+const MARK = '<svg viewBox="0 0 150 100" aria-hidden="true"><circle cx="56" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="7"/><circle cx="94" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="7"/></svg>';
+const REASONS = { insult: "Haqorat", private_data: "Shaxsiy ma’lumot", spam: "Reklama yoki spam", harmful: "Xavfli maslahat", sexual: "Uyatsiz taklif", other: "Boshqa" };
+const CATEGORIES = {
+  terror: ["Terrorizm", "severe"], csam: ["Bolalarga oid", "severe"], sexual_offer: ["Jinsiy taklif", ""],
+  drugs: ["Giyohvand", ""], scam: ["Firibgarlik", "warn"], contact: ["Havola yoki raqam", "plain"],
+  spam: ["Spam", "warn"], flood: ["Ko‘p yozish", "plain"], suspended: ["Cheklangan", "plain"]
+};
+
+const state = { key: null, tab: "reports", overview: null, reports: [], automod: [], restricted: [], groups: [], selected: 0, busy: false };
+
+function store(get, value) {
+  try { if (get) return localStorage.getItem("nafas-admin-key"); if (value === null) localStorage.removeItem("nafas-admin-key"); else localStorage.setItem("nafas-admin-key", value); } catch { return null; }
+}
+
+async function call(action, args = {}) {
+  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", "x-admin-key": state.key }, body: JSON.stringify({ action, args }) });
+  if (res.status === 403) { signOut(); throw new Error("forbidden"); }
+  const data = await res.json();
+  if (data && data.error) throw new Error(data.error);
+  return data;
+}
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function ago(iso) {
+  const m = Math.max(1, Math.round((Date.now() - new Date(iso)) / 60000));
+  if (m < 60) return m + " daq";
+  if (m < 1440) return Math.round(m / 60) + " soat";
+  return Math.round(m / 1440) + " kun";
+}
+function clock(iso) { const d = new Date(iso); return d.toLocaleDateString("uz-UZ", { day: "2-digit", month: "2-digit" }) + " " + d.toTimeString().slice(0, 5); }
+function strikes(n) { return '<span class="strikes" title="' + n + ' ta qoidabuzarlik">' + [0,1,2].map(i => '<i class="' + (i < n ? "on" : "") + '"></i>').join("") + "</span>"; }
+function suspendedText(u) { return u && u.suspended_until && new Date(u.suspended_until) > new Date() ? '<span class="chip">' + clock(u.suspended_until) + ' gacha cheklangan</span>' : ""; }
+function toast(text) { const t = document.getElementById("toast"); t.textContent = text; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2200); }
+
+function gate(error = "") {
+  document.getElementById("root").innerHTML = `
+    <div class="gate"><form id="f">
+      <span class="mark" style="color:var(--accent)">${MARK}<span style="color:var(--ink)">Nafas</span></span>
+      <h1>Moderatsiya</h1>
+      <p>Faqat ilova egasi uchun. Admin kalitini kiriting — u shu brauzerda saqlanadi.</p>
+      <input id="k" type="password" autocomplete="current-password" placeholder="nafas-admin-…" aria-label="Admin kaliti" required>
+      <div class="err">${esc(error)}</div>
+      <button class="primary" style="margin-top:8px">Kirish</button>
+    </form></div>`;
+  document.getElementById("f").onsubmit = async (e) => {
+    e.preventDefault();
+    state.key = document.getElementById("k").value.trim();
+    try { await load(); store(false, state.key); } catch { state.key = null; gate("Kalit noto‘g‘ri"); }
+  };
+}
+
+function signOut() { store(false, null); state.key = null; gate(); }
+
+async function load() {
+  const [overview, reports, automod, restricted, groups] = await Promise.all([
+    call("overview"), call("reports"), call("automod"), call("restricted"), call("groups")
+  ]);
+  Object.assign(state, { overview, reports, automod, restricted, groups });
+  state.selected = Math.min(state.selected, Math.max(0, reports.length - 1));
+  render();
+}
+
+function render() {
+  const o = state.overview || {};
+  const tabs = [
+    ["reports", "Shikoyatlar", state.reports.length, true],
+    ["automod", "Avtomatik", o.automod_today || 0, false],
+    ["restricted", "Cheklanganlar", state.restricted.length, false],
+    ["groups", "Guruhlar", state.groups.length, false],
+  ];
+  document.getElementById("root").innerHTML = `
+    <div class="app">
+      <aside class="rail">
+        <span class="mark" style="color:var(--accent);padding:0 12px">${MARK}<span style="color:var(--ink)">Moderatsiya</span></span>
+        <nav aria-label="Bo‘limlar">${tabs.map(([id, title, n, loud]) =>
+          `<button data-tab="${id}" aria-current="${state.tab === id}">${title}<span class="count ${loud && n ? "" : "quiet"}">${n}</span></button>`).join("")}
+        </nav>
+        <div class="pulse">
+          <div>A’zolar <b>${o.members ?? "–"}</b></div>
+          <div>Bugungi postlar <b>${o.posts_today ?? "–"}</b></div>
+          <div>Bugun avtomatik <b>${o.automod_today ?? "–"}</b></div>
+          <div>Cheklangan <b>${o.suspended ?? "–"}</b></div>
+        </div>
+        <button class="signout" id="out">Chiqish</button>
+      </aside>
+      <section class="view">${({ reports: viewReports, automod: viewAutomod, restricted: viewRestricted, groups: viewGroups })[state.tab]()}</section>
+    </div>`;
+  document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { state.tab = b.dataset.tab; render(); });
+  document.getElementById("out").onclick = signOut;
+  wire();
+}
+
+function caseTitle(c) {
+  return c.kind === "post" ? "Post · " + esc(c.gap) : "Suhbat";
+}
+
+function viewReports() {
+  if (!state.reports.length) return `<header><h2>Shikoyatlar</h2></header><div class="empty"><div><b>Hammasi ko‘rib chiqilgan</b>Yangi shikoyat kelsa, shu yerda paydo bo‘ladi.</div></div>`;
+  const c = state.reports[state.selected];
+  return `
+    <header><h2>Shikoyatlar</h2><span class="hint"><kbd>J</kbd><kbd>K</kbd> o‘tish · <kbd>Q</kbd> qoldirish · <kbd>R</kbd> o‘chirish · <kbd>S</kbd> cheklash</span></header>
+    <div class="inbox">
+      <div class="cases" role="listbox" aria-label="Holatlar">${state.reports.map((x, i) => `
+        <button class="case" role="option" data-i="${i}" aria-selected="${i === state.selected}">
+          <div class="meta"><span>${caseTitle(x)}</span><span>${ago(x.first_at)}</span></div>
+          <div class="who">${x.kind === "post" && x.is_anonymous ? "Ismsiz" : esc(x.author.name)}</div>
+          <div class="excerpt">${esc(x.kind === "post" ? (x.title ? x.title + " — " : "") + x.body : (x.evidence?.at?.(-1)?.body || "Xabarlar"))}</div>
+          <div class="chips"><span class="chip">${x.count} ta shikoyat</span>${(x.reasons || []).map(r => `<span class="chip plain">${REASONS[r] || esc(r)}</span>`).join("")}${x.status === "pending" ? '<span class="chip warn">Yashirilgan</span>' : ""}</div>
+        </button>`).join("")}
+      </div>
+      <div class="detail">${detail(c)}</div>
+    </div>`;
+}
+
+function detail(c) {
+  const author = c.author || {};
+  const body = c.kind === "post"
+    ? `<div class="quote">${c.title ? `<strong>${esc(c.title)}</strong>` : ""}${esc(c.body)}</div>`
+    : `<div class="thread">${(c.evidence || []).map(m => `<div class="bubble">${m.kind === "text" ? esc(m.body) : (m.kind === "image" ? "Rasm" : "Ovozli xabar")}<time>${clock(m.at)}</time></div>`).join("") || '<div class="hint">Xabarlar topilmadi</div>'}</div>`;
+  return `
+    <div class="inner">
+      <div class="kicker">${caseTitle(c)} · ${c.count} ta shikoyat · birinchisi ${ago(c.first_at)} oldin</div>
+      <h3>${c.kind === "post" ? (c.is_anonymous ? "Ismsiz post" : esc(author.name) + "ning posti") : esc(author.name) + " ustidan shikoyat"}</h3>
+      <div class="chips">${(c.reasons || []).map(r => `<span class="chip plain">${REASONS[r] || esc(r)}</span>`).join("")}${c.status === "pending" ? '<span class="chip warn">3 ta shikoyat — avtomatik yashirilgan</span>' : ""}</div>
+      ${body}
+      <div class="person">Muallif: <b>${esc(author.name || "—")}</b> ${strikes(author.strikes || 0)} ${suspendedText(author)}</div>
+      ${c.kind === "post" && c.is_anonymous ? '<div class="hint" style="margin-top:6px">Muallif ismi faqat sizga ko‘rinadi — boshqa a’zolar uni hech qachon ko‘rmaydi.</div>' : ""}
+    </div>
+    <div class="verdict">
+      <button class="btn" data-act="keep"><kbd>Q</kbd>${c.kind === "post" ? "Qoldirish" : "Rad etish"}</button>
+      ${c.kind === "post" ? '<button class="btn danger" data-act="remove"><kbd>R</kbd>O‘chirish</button>' : ""}
+      <span class="spacer"></span>
+      <select class="btn" id="days" aria-label="Cheklash muddati"><option value="7">7 kun</option><option value="30">30 kun</option><option value="3650">Butunlay</option></select>
+      <button class="btn" data-act="suspend"><kbd>S</kbd>Muallifni cheklash</button>
+    </div>`;
+}
+
+function viewAutomod() {
+  return `
+    <header><h2>Avtomatik o‘chirilganlar</h2><span class="hint">Nafas o‘zi ushlagan xabar, izoh va postlar — oxirgi 200 ta</span></header>
+    <div class="table">
+      <div class="row head"><span>Vaqt</span><span>Sabab</span><span>Matn</span><span>Muallif</span><span></span></div>
+      ${state.automod.map(l => { const [title, tone] = CATEGORIES[l.category] || [l.category, "plain"]; const u = l.author || {}; return `
+        <div class="row"><time>${clock(l.at)}</time><span><span class="chip ${tone}">${esc(title)}</span></span>
+          <span class="ex" title="${esc(l.excerpt)}">${esc(l.excerpt)}</span>
+          <span>${esc(u.name || "—")} ${strikes(u.strikes || 0)}</span>
+          <span>${u.id ? (u.suspended_until && new Date(u.suspended_until) > new Date()
+            ? `<button class="link" data-lift="${u.id}">Cheklovni olish</button>`
+            : `<button class="link" data-ban="${u.id}">7 kun cheklash</button>`) : ""}</span>
+        </div>`; }).join("") || '<div class="empty"><div><b>Hozircha toza</b>Avtomatik moderatsiya hech narsa ushlamadi.</div></div>'}
+    </div>`;
+}
+
+function viewRestricted() {
+  return `
+    <header><h2>Cheklanganlar</h2><span class="hint">Qoidabuzarligi bor yoki hozir cheklangan a’zolar</span></header>
+    <div class="table">
+      <div class="row r3 head"><span>A’zo</span><span>Qoidabuzarlik</span><span>Holat</span><span></span></div>
+      ${state.restricted.map(u => `
+        <div class="row r3"><span><b>${esc(u.name || "Nafas a’zosi")}</b>${u.last ? ` <span class="chip plain">${esc((CATEGORIES[u.last] || [u.last])[0])}</span>` : ""}</span>
+          <span>${strikes(u.strikes)}</span>
+          <span>${u.suspended_until && new Date(u.suspended_until) > new Date() ? clock(u.suspended_until) + " gacha" : "Ogohlantirilgan"}</span>
+          <span style="display:flex;gap:14px"><button class="link" data-lift="${u.id}">Tozalash</button><button class="link" data-ban="${u.id}">7 kun</button><button class="link" data-ban30="${u.id}">30 kun</button></span>
+        </div>`).join("") || '<div class="empty"><div><b>Hech kim cheklanmagan</b></div></div>'}
+    </div>`;
+}
+
+function viewGroups() {
+  return `
+    <header><h2>Guruhlar</h2><span class="hint">Moderatorlar ilovada o‘z guruhining navbatini ko‘radi: shikoyat qilingan postlar shu yerga tushadi</span></header>
+    <div class="groups">${state.groups.map(g => `
+      <div class="group">
+        <div><div class="name">${esc(g.name)}</div><div class="sub">${g.members} a’zo</div>${g.moderators.length ? "" : '<div class="warn-line">Moderator yo‘q</div>'}</div>
+        <div class="mods">${g.moderators.map(m => `<span class="mod">${esc(m.name)}<button aria-label="Olib tashlash" data-unmod="${g.id}|${m.id}">×</button></span>`).join("")}
+          <span class="adder"><input placeholder="+ Moderator qo‘shish" data-find="${g.id}" aria-label="${esc(g.name)} uchun moderator qidirish"></span>
+        </div>
+      </div>`).join("")}
+    </div>`;
+}
+
+function wire() {
+  document.querySelectorAll(".case").forEach(b => b.onclick = () => { state.selected = +b.dataset.i; render(); });
+  document.querySelectorAll("[data-act]").forEach(b => b.onclick = () => act(b.dataset.act));
+  document.querySelectorAll("[data-lift]").forEach(b => b.onclick = () => run("suspend", { id: b.dataset.lift, days: 0 }, "Cheklov olib tashlandi"));
+  document.querySelectorAll("[data-ban]").forEach(b => b.onclick = () => run("suspend", { id: b.dataset.ban, days: 7 }, "7 kunga cheklandi"));
+  document.querySelectorAll("[data-ban30]").forEach(b => b.onclick = () => run("suspend", { id: b.dataset.ban30, days: 30 }, "30 kunga cheklandi"));
+  document.querySelectorAll("[data-unmod]").forEach(b => b.onclick = () => { const [gap, user] = b.dataset.unmod.split("|"); run("set_moderator", { gap, user, on: false }, "Moderator olib tashlandi"); });
+  document.querySelectorAll("[data-find]").forEach(input => {
+    let timer;
+    input.oninput = () => {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        input.parentElement.querySelector("ul")?.remove();
+        if (input.value.trim().length < 2) return;
+        const people = await call("find_member", { q: input.value.trim() });
+        const ul = document.createElement("ul");
+        ul.innerHTML = people.map(p => `<li><button data-id="${p.id}">${esc(p.name)}</button></li>`).join("") || '<li style="padding:8px 10px;color:var(--muted)">Topilmadi</li>';
+        ul.querySelectorAll("button").forEach(b => b.onclick = () => run("set_moderator", { gap: input.dataset.find, user: b.dataset.id, on: true }, "Moderator qo‘shildi"));
+        input.parentElement.appendChild(ul);
+      }, 220);
+    };
+  });
+}
+
+async function run(action, args, message) {
+  if (state.busy) return;
+  state.busy = true;
+  try { await call(action, args); toast(message); await load(); }
+  catch (e) { if (e.message !== "forbidden") toast("Bo‘lmadi: " + e.message); }
+  finally { state.busy = false; }
+}
+
+function act(kind) {
+  const c = state.reports[state.selected];
+  if (!c) return;
+  if (kind === "keep") return c.kind === "post" ? run("decide_post", { id: c.id, decision: "keep" }, "Qoldirildi") : run("dismiss_person", { id: c.id }, "Shikoyat rad etildi");
+  if (kind === "remove" && c.kind === "post") return run("decide_post", { id: c.id, decision: "remove" }, "Post o‘chirildi, muallifga xabar ketdi");
+  if (kind === "suspend") {
+    const days = +(document.getElementById("days")?.value || 7);
+    const then = c.kind === "post" ? () => call("decide_post", { id: c.id, decision: "remove" }) : () => Promise.resolve();
+    return then().then(() => run("suspend", { id: c.author.id, days }, days > 365 ? "Butunlay cheklandi" : days + " kunga cheklandi"));
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  if (!state.key || state.tab !== "reports" || /input|select|textarea/i.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === "j" || e.key === "ArrowDown") { state.selected = Math.min(state.selected + 1, state.reports.length - 1); render(); }
+  else if (k === "k" || e.key === "ArrowUp") { state.selected = Math.max(state.selected - 1, 0); render(); }
+  else if (k === "q") act("keep");
+  else if (k === "r") act("remove");
+  else if (k === "s") act("suspend");
+});
+
+state.key = store(true);
+if (state.key) load().catch(() => gate()); else gate();
+</script>
+</body>
+</html>
