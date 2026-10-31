@@ -24,7 +24,7 @@
   }
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
+html, body, #root { margin: 0; height: 100%; }
 body { background: var(--paper); color: var(--ink); font: 15px/1.5 -apple-system, "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; cursor: pointer; }
 kbd { font: 600 11px/1 ui-monospace, "SF Mono", monospace; padding: 3px 5px; border-radius: 5px; border: 1px solid var(--line-2); color: var(--muted); }
@@ -94,7 +94,7 @@ kbd { font: 600 11px/1 ui-monospace, "SF Mono", monospace; padding: 3px 5px; bor
 .btn.danger { background: var(--accent); border-color: transparent; color: #fff; }
 .btn.danger kbd { color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.35); }
 .btn:disabled { opacity: .5; cursor: default; }
-select.btn { appearance: none; padding-right: 14px; }
+select.btn { appearance: none; padding-right: 14px; color: var(--ink); background: var(--card); }
 .spacer { flex: 1; }
 
 .empty { display: grid; place-items: center; text-align: center; color: var(--muted); padding: 60px 24px; height: 100%; }
